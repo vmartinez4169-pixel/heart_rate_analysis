@@ -1,79 +1,6 @@
-def clean_heartrate_data(data: list) -> tuple:
-    """
-    Clean raw heart-rate data by removing malformed or impossible values.
-    """
-    cleaned_list = []
-    removed_values = 0
-
-    for row in data:
-        row = row.strip()
-
-        if row.isdigit():
-            value = int(row)
-
-            if value >= 30 and value <= 220:
-                cleaned_list.append(value)
-            else:
-                removed_values += 1
-        else:
-            removed_values += 1
-
-    return cleaned_list, removed_values
-
-
-def average(data: list) -> float:
-    """
-    Calculate average of a list of integers using a for-loop. Assumes data is clean.
-    """
-    total = 0
-
-    for value in data:
-        total = total + value
-
-    return total / len(data)
-
-
-def median(data: list) -> float:
-    """
-    Calculate the median value of a clean list of heart-rate readings.
-    """
-    data = sorted(data)
-
-    n = len(data)
-    middle = n // 2
-
-    if n % 2 == 1:
-        return data[middle]
-    else:
-        return (data[middle - 1] + data[middle]) / 2
-
-
-def range(data: list) -> float:
-    """
-    Calculate the range of a clean list of heart-rate readings.
-    """
-    highest = max(data)
-    lowest = min(data)
-
-    return highest - lowest
-
-
-def rolling_avg(data: list, k: int) -> list:
-    """
-    CHALLENGE FUNCTION (Optional)
-    """
-    averages = []
-
-    for i in range(len(data) - k + 1):
-        total = 0
-
-        for j in range(i, i + k):
-            total = total + data[j]
-
-        avg = total / k
-        averages.append(avg)
-
-    return averages
+import data_analysis
+import data_cleaning
+import data_visualizations
 
 
 def run(file: str):
@@ -94,12 +21,19 @@ def run(file: str):
         data = file_obj.readlines()
 
     # Use `clean_heartrate_data` to clean the data and remove invalid entries
-    cleaned_list, removed_values = clean_heartrate_data(data)
+    cleaned_list, removed_values = data_cleaning.clean_heartrate_data(data)
 
-    # calculate the average, median, and range of this file using the functions you've wrote
-    avg_val = round(average(cleaned_list), 2)
-    med_val = round(median(cleaned_list), 2)
-    range_val = round(range(cleaned_list), 2)
+    # calculate the average, median, range, variance, and standard deviation of this file using these functions.
+    avg_val = round(data_analysis.average(cleaned_list), 2)
+    med_val = round(data_analysis.median(cleaned_list), 2)
+    range_val = round(data_analysis.range(cleaned_list), 2)
+    var_val = round(data_analysis.variance(cleaned_list), 2)
+    std_val = round(data_analysis.standard_deviation(cleaned_list), 2)
+
+    # create and save line plot image
+    filename = file.replace("data/", "images/").replace(".txt", ".png")
+    data_visualizations.plot_line_chart(cleaned_list, filename)
+    print("Saved image to:", filename)
 
     # print out your data quality measure to the console
     print("File:", file)
@@ -109,8 +43,11 @@ def run(file: str):
     print("Average heart rate:", avg_val)
     print("Median heart rate:", med_val)
     print("Range of heart rates:", range_val)
+    print("Variance:", var_val)
+    print("Standard deviation:", std_val)
 
-    return avg_val, med_val, range_val
+
+    return avg_val, med_val, range_val, var_val, std_val
 
 
 if __name__ == "__main__":
